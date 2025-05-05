@@ -1,9 +1,11 @@
 package com.kmpalombo.book_review_manager_repo.service;
 
 import com.kmpalombo.book_review_manager_repo.model.Book;
+import com.kmpalombo.book_review_manager_repo.model.external_api.ExternalApiData;
 import com.kmpalombo.book_review_manager_repo.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -15,7 +17,33 @@ public class BookService {
 
     // List all books
     public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+        List <Book> books = bookRepository.findAll();
+        if (books.isEmpty()) {
+            String uri = "https://api.potterdb.com/v1/books";
+            RestTemplate restTemplate = new RestTemplate();
+            ExternalApiData data = restTemplate.getForObject(uri, ExternalApiData.class);
+            System.out.println("Data from external API: " + data);
+            if (data != null) {
+                data.getData().forEach(
+                        book -> {
+                            Book newBook = new Book();
+                            // Assuming book has properties like title, author, etc.
+                            // You need to set these properties based on the actual structure of the book object
+                            newBook.setTitle(book.getAttributes().getTitle());
+                            newBook.setAuthor(book.getAttributes().getAuthor());
+                            newBook.setIsbn("");
+                            newBook.setDescription(book.getAttributes().getSummary().substring(0, 252).concat("..."));
+                            newBook.setPublisher("");
+                            newBook.setPublicationDate(book.getAttributes().getRelease_date());
+                            newBook.setGenre("Fiction");
+                            newBook.setImageUrl(book.getAttributes().getCover());
+                            System.out.println("New book created: " + newBook);
+                            bookRepository.save(newBook);
+                        }
+                );
+            }
+        }
+        return books;
     }
 
     // Find a book by ID

@@ -19,9 +19,6 @@ public class BookController {
     @GetMapping
     public ResponseEntity<List<Book>> list() {
         List<Book> books = bookService.getAllBooks();
-        if (books.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.ok(books);
     }
 

@@ -23,7 +23,7 @@ public class Book {
     @Column(name = "author", nullable = false)
     private String author;
 
-    @Column(name = "isbn", nullable = false, unique = true)
+    @Column(name = "isbn", nullable = false)
     private String isbn;
 
     @Column(name = "description")
